@@ -22,15 +22,46 @@
 #include <string.h>
 #include "tclfribidi.h"
 
+#include <fribidi.h>
+
 #define TCL_READ_CHUNK_SIZE 4096
 
+/*
+ * pyfribidi: 
+ *       log2vis(logical, base_direction=273, encoding='utf-8', clean=False, reordernsm=True)
+ *            Return string reordered visually according to base direction.
+ *            Return the same type of input string, either unicode or string using
+ *            encoding.
+ *            
+ *            Note that this function does not handle line breaking. You should
+ *            call log2vis with each line.
+ *            
+ *            Arguments:
+ *            - logical: unicode or encoded string
+ *            - base_direction: optional logical base direction. Accepts one of
+ *              the constants LTR, RTL or ON, defined in this module. ON calculate
+ *              the base direction according to the BiDi algorithm.
+ *            - encoding: optional string encoding (ignored for unicode input)
+ *
+ * notes:     --reordernsm Reorder NSM sequences to follow their base character
+ *            --clean      Remove explicit format codes in visual string / output
+ *    
+ */
+
+/*
+ * tcl-fribidi: 
+ *       proc fribidi::log2vis { logical {base_direction 273} {encoding 'utf-8'} }
+ */
 static int 
 Log2vis_Cmd(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
+  Tcl_Obj *inputObj = NULL;
+
+  
+
   Tcl_SetObjResult(interp, Tcl_NewStringObj("Hello, World!", -1));
   return TCL_OK;
 }
 
-
 /*
  *----------------------------------------------------------------------
  *
