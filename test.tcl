@@ -2,5 +2,14 @@
 
 lappend auto_path .
 package require fribidi
-puts [fribidi::log2vis -string "foo"]
+
+proc print {s} {
+ puts "old: $s"
+ set S [fribidi::log2vis $s]
+ puts "new: $S"
+
+}
+
+print "abcde"
+print "שנבגק"
 
