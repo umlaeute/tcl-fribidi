@@ -45,7 +45,7 @@ Log2vis_Cmd(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[
  *
  * Side effects:
  *	The Fribidi package is created.
- *	One new command "sha1" is added to the Tcl interpreter.
+ *	One new command "fribidi::log2vis" is added to the Tcl interpreter.
  *
  *----------------------------------------------------------------------
  */
@@ -77,11 +77,6 @@ Fribidi_Init(Tcl_Interp *interp)
     }
     Tcl_CreateObjCommand(interp, "fribidi::log2vis", (Tcl_ObjCmdProc *) Log2vis_Cmd,
 	    (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
-
-    numcontexts = 1;
-    sha1Contexts = (SHA1_CTX *) malloc(sizeof(SHA1_CTX));
-    ctxtotalRead = (int *) malloc(sizeof(int));
-    ctxtotalRead[0] = 0;
 
     return TCL_OK;
 }
