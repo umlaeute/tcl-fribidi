@@ -48,19 +48,111 @@
  *    
  */
 
+static FriBidiCharSet getEncoding(const char*s) {
+  if(!strcmp("utf-8", s))
+    return FRIBIDI_CHAR_SET_UTF8;
+
+
+  return FRIBIDI_CHAR_SET_UTF8;
+}
+
 /*
  * tcl-fribidi: 
  *       proc fribidi::log2vis { logical {base_direction 273} {encoding 'utf-8'} }
  */
 static int 
 Log2vis_Cmd(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
-  Tcl_Obj *inputObj = NULL;
+  char*input=NULL;
+  char*output=NULL;
+  int msglen;
 
-  
 
-  Tcl_SetObjResult(interp, Tcl_NewStringObj("Hello, World!", -1));
+  int direction=FRIBIDI_PAR_ON;
+  char*encoding="utf-8";
+  switch(objc) {
+  default:
+  case 4:
+    encoding=Tcl_GetString(objv[3]);
+  case 3:
+    if (Tcl_GetIntFromObj(interp, objv[2], &direction) != TCL_OK)
+      return TCL_ERROR;
+  case 2:
+    input=Tcl_GetString(objv[1]);
+    break;
+  case 1:
+  case 0:
+    goto wrongArgs;
+  }
+  if(input) {
+    FriBidiParType   dir=direction;
+    FriBidiChar *str_in = NULL, *str_out = NULL;
+    FriBidiStrIndex ulen = 0;
+    FriBidiLevel err = 0;
+    int u32len=0;
+
+    FriBidiCharSet enc=getEncoding(encoding);
+
+    msglen=strlen(input);
+
+    output=calloc(msglen*2, sizeof(*output));
+
+    u32len=2*msglen*sizeof(FriBidiChar);
+    
+    str_in  = malloc(u32len);
+    str_out = malloc(u32len);
+    /* convert UTF8 to UTF32 */
+    ulen = fribidi_charset_to_unicode(enc, input, msglen, str_in);
+    /* reshape the UTF32 string */
+    err = fribidi_log2vis(str_in, ulen, &dir, str_out, 0, 0, 0);
+    if(err) {
+      msglen = fribidi_unicode_to_charset(enc, str_out, ulen, output);
+    }
+    free(str_in);
+    free(str_out);
+  }
+
+
+  Tcl_AppendResult (interp, output,
+                    (char *) NULL);
+  //Tcl_SetObjResult(interp, Tcl_NewStringObj("Hello, World!", -1));
+  /*
+  Tcl_AppendResult (interp, input,
+                    "  ",
+                    encoding,
+                    (char *) NULL);
+  */
+  free(output);
   return TCL_OK;
+  
+ wrongArgs:
+  Tcl_AppendResult (interp, "wrong # args: should be:\n",
+                    "  ",
+                    Tcl_GetString(objv[0]),
+                    " string ?basedir? ?encoding?\n",
+                    "    ",
+                    "with 'basedir' being one of\n",
+                    "      fribidi::par::LTR\t(Left-To-Right)\n",
+                    "      fribidi::par::LTR\t(Right-To-Left)\n",
+                    "      fribidi::par::ON\t(DirectiON-Neutral)\n",
+                    "      fribidi::par::WLTR\t(Weak Left-To-Right)\n",
+                    "      fribidi::par::WRTL\t(Weak Right-To-left)\n",
+                    "    ",
+                    "and 'encoding' being one of\n",
+                    "      'utf-8\n'",
+                    (char *) NULL);
+  return TCL_ERROR;
 }
+#define TCLFRIBIDI_CONST(name)                                          \
+  static int                                                            \
+  name##_Const(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) { \
+    Tcl_SetIntObj(Tcl_GetObjResult(interp), FRIBIDI_PAR_##name);         \
+    return TCL_OK;                                                      \
+  }
+TCLFRIBIDI_CONST(LTR);
+TCLFRIBIDI_CONST(RTL);
+TCLFRIBIDI_CONST(ON);
+TCLFRIBIDI_CONST(WLTR);
+TCLFRIBIDI_CONST(WRTL);
 
 /*
  *----------------------------------------------------------------------
@@ -106,8 +198,17 @@ Fribidi_Init(Tcl_Interp *interp)
     if (nsPtr == NULL) {
       return TCL_ERROR;
     }
+    nsPtr = Tcl_CreateNamespace(interp, "fribidi::par", NULL, NULL);
+    if (nsPtr == NULL) {
+      return TCL_ERROR;
+    }
+
     Tcl_CreateObjCommand(interp, "fribidi::log2vis", (Tcl_ObjCmdProc *) Log2vis_Cmd,
 	    (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
-
+    Tcl_CreateObjCommand(interp, "fribidi::par::LTR", (Tcl_ObjCmdProc *) LTR_Const ,(ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+    Tcl_CreateObjCommand(interp, "fribidi::par::RTL", (Tcl_ObjCmdProc *) RTL_Const ,(ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+    Tcl_CreateObjCommand(interp, "fribidi::par::ON",  (Tcl_ObjCmdProc *) ON_Const  ,(ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+    Tcl_CreateObjCommand(interp, "fribidi::par::WLTR",(Tcl_ObjCmdProc *) WLTR_Const,(ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+    Tcl_CreateObjCommand(interp, "fribidi::par::WRTL",(Tcl_ObjCmdProc *) WRTL_Const,(ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
     return TCL_OK;
 }
