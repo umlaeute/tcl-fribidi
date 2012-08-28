@@ -8,6 +8,9 @@ dnl	to configure the system for the local environment.
 # need to modify this file are marked by the string __CHANGE__
 #-----------------------------------------------------------------------
 
+AC_PREREQ(2.60)
+AC_CONFIG_MACRO_DIR([m4])
+
 #-----------------------------------------------------------------------
 # __CHANGE__
 # Set your package name and version numbers here.
@@ -29,7 +32,7 @@ AC_INIT([fribidi], [0.1])
 
 TEA_INIT([3.1])
 
-AC_CONFIG_AUX_DIR(tclconfig)
+AC_CONFIG_AUX_DIR([tclconfig])
 
 #--------------------------------------------------------------------
 # Load the tclConfig.sh file
@@ -176,6 +179,19 @@ TEA_MAKE_LIB
 
 TEA_PROG_TCLSH
 #TEA_PROG_WISH
+
+
+#--------------------------------------------------------------------
+# check for the FriBidi library, needed to do what we want to do
+#--------------------------------------------------------------------
+dnl fribidi (bidirectional text input)
+PKG_CHECK_MODULES([FRIBIDI], [fribidi], 
+    AC_DEFINE([HAVE_FRIBIDI], [1], [bidrectional text input using FriBidi]), 
+    AC_MSG_ERROR([need libFriBidi]))
+
+
+
+
 
 #--------------------------------------------------------------------
 # Finally, substitute all of the various values into the Makefile.
