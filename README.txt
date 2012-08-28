@@ -15,3 +15,10 @@ think about a full wrapper around FriBidi
 EVEN LATER:
 bidi-support for tk-widgets
 (but this might be an entirely different project)
+
+
+building from git:
+$ autoconf
+$ ./configure
+$ make
+$ make install
