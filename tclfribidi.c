@@ -1,5 +1,5 @@
 /*
- * tclfribidi.c --
+ * tclfribidi.c -- tcl bindings for libFriBidi
  *
  *	This file implements a Tcl interface to libFriBidi
  *  a library for bidirectional text output
@@ -9,11 +9,6 @@
  * See the file "LICENSE.txt" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- */
-
-/*
- * Modified from sampleextension.c by IOhannes m zmölnig, 8/28/12
- * Modified from tclmd5.c by Dave Dykstra, dwd@bell-labs.com, 4/22/97
  */
 
 #include <tcl.h>
