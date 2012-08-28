@@ -53,7 +53,7 @@ static FriBidiCharSet getEncoding(const char*s) {
     return FRIBIDI_CHAR_SET_UTF8;
 
 
-  return FRIBIDI_CHAR_SET_UTF8;
+  return FRIBIDI_CHAR_SET_NOT_FOUND;
 }
 
 /*
@@ -65,6 +65,7 @@ Log2vis_Cmd(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[
   char*input=NULL;
   char*output=NULL;
   int msglen;
+  FriBidiCharSet enc=FRIBIDI_CHAR_SET_UTF8;
 
 
   int direction=FRIBIDI_PAR_ON;
@@ -72,10 +73,22 @@ Log2vis_Cmd(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[
   switch(objc) {
   default:
   case 4:
-    encoding=Tcl_GetString(objv[3]);
+    enc=getEncoding(Tcl_GetString(objv[3]));
+    if(FRIBIDI_CHAR_SET_NOT_FOUND==enc)
+      return TCL_ERROR;
   case 3:
     if (Tcl_GetIntFromObj(interp, objv[2], &direction) != TCL_OK)
       return TCL_ERROR;
+    switch(direction) {
+    case FRIBIDI_PAR_LTR:
+    case FRIBIDI_PAR_RTL:
+    case FRIBIDI_PAR_ON:
+    case FRIBIDI_PAR_WLTR:
+    case FRIBIDI_PAR_WRTL:
+      break;
+    default:
+      return TCL_ERROR;
+    }
   case 2:
     input=Tcl_GetString(objv[1]);
     break;
@@ -130,15 +143,15 @@ Log2vis_Cmd(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[
                     Tcl_GetString(objv[0]),
                     " string ?basedir? ?encoding?\n",
                     "    ",
-                    "with 'basedir' being one of\n",
-                    "      fribidi::par::LTR\t(Left-To-Right)\n",
-                    "      fribidi::par::LTR\t(Right-To-Left)\n",
-                    "      fribidi::par::ON\t(DirectiON-Neutral)\n",
+                    "with <basedir> being one of\n",
+                    "      fribidi::par::LTR \t(Left-To-Right)\n",
+                    "      fribidi::par::LTR \t(Right-To-Left)\n",
+                    "      fribidi::par::ON  \t(DirectiON-Neutral)\n",
                     "      fribidi::par::WLTR\t(Weak Left-To-Right)\n",
                     "      fribidi::par::WRTL\t(Weak Right-To-left)\n",
                     "    ",
-                    "and 'encoding' being one of\n",
-                    "      'utf-8\n'",
+                    "and <encoding> being one of\n",
+                    "      'utf-8'\n'",
                     (char *) NULL);
   return TCL_ERROR;
 }
