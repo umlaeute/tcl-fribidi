@@ -18,7 +18,6 @@ bidi-support for tk-widgets
 
 INSTALLATION
 ------------
-
 building from git:
 $ autoconf
 $ ./configure
@@ -34,6 +33,9 @@ DEPENDENCIES
 this extension depends on the GNU libfribidi library to handle bi-directional
 text.
 you can get it from http://fribidi.org/
-if you are using Debian (or a Debian-derivative, like ubuntu), there is already
-a package available:
-$ sudo aptitude install libfribidi-dev
+since this is a tcl-extension, you will also need the tools to build such an
+extension (tcl (with headers), compiler, linker).
+if you are using Debian (or a Debian-derivative, like ubuntu), there are already
+packages available:
+$ sudo aptitude install libfribidi-dev tcl-dev
+
